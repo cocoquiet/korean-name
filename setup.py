@@ -1,32 +1,34 @@
 import requests
-import json
+import urllib3
 from bs4 import BeautifulSoup
+import json
 import time
 
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-session = requests.Session()
+print('reset file')
+with open('nameList.txt', 'w', encoding='euc-kr') as f:
+    f.write('')
 
-for page in range(1, 36):
-    url = f'http://api.namechart.kr/chart/overall?gender=t&page={page}&size=100'
+for page in range(1, 31):
+    url = f'https://api.namechart.kr/chart/overall?gender=t&page={page}&size=100'
 
     try:
-        response = session.get(url, verify=False)
+        response = requests.get(url, verify=False)
     except:
-        print('에러: 2초 딜레이')
+        print('error: restart')
         time.sleep(2)
-        response = session.get(url, verify=False)
+        response = requests.get(url, verify=False)
 
     if response.status_code == 200:
-        print(f'page {page} start')
+        print('page %2d start'%page)
         
         html = response.text
         soup = BeautifulSoup(html, 'html.parser')
-        with open('nameList', 'a', encoding='euc-kr') as f:
+        with open('nameList.txt', 'a', encoding='euc-kr') as f:
             for item in json.loads(soup.text)['items']:
                 name = item['name']
                 f.write(f'{name}\n')
-
-        print(f'page {page} end')
 
     else : 
         print(response.status_code)
